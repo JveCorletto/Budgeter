@@ -1,3 +1,12 @@
+USE master
+GO
+
+IF EXISTS (SELECT 1 FROM sys.databases WHERE name = 'Budgeter')
+BEGIN
+    DROP DATABASE Budgeter;
+END
+GO
+
 CREATE DATABASE Budgeter;
 GO
 
@@ -5,17 +14,18 @@ USE Budgeter;
 GO
 
 CREATE TABLE Usuarios (
-    IdUsuario INT PRIMARY KEY IDENTITY(1,1),
-    NombreUsuario VARCHAR(50) NOT NULL,
-    Email VARCHAR(100) NOT NULL UNIQUE,
-    ContraseñaHash NVARCHAR(MAX) NOT NULL,
-    FechaRegistro DATETIME DEFAULT GETDATE(),
-    EstadoUsuario BIT DEFAULT 1
+    IdUsuario BIGINT PRIMARY KEY IDENTITY(1,1),
+    Usuario VARCHAR(MAX) NOT NULL,
+    Correo VARCHAR(255) NOT NULL UNIQUE,
+    Contrasenia NVARCHAR(MAX) NOT NULL,
+    EstadoUsuario BIT DEFAULT(1),
+	IntentosLogin INT NOT NULL DEFAULT(0),
+	UltimoAcceso DATETIME NULL
 );
 
 CREATE TABLE Personas (
-    IdPersona INT PRIMARY KEY IDENTITY(1,1),
-    IdUsuario INT NOT NULL UNIQUE FOREIGN KEY REFERENCES Usuarios(IdUsuario),
+    IdPersona BIGINT PRIMARY KEY IDENTITY(1,1),
+    IdUsuario BIGINT NOT NULL UNIQUE FOREIGN KEY REFERENCES Usuarios(IdUsuario),
     NombreCompleto VARCHAR(100) NOT NULL,
     Telefono VARCHAR(15),
     Direccion VARCHAR(255),
@@ -24,7 +34,7 @@ CREATE TABLE Personas (
 
 CREATE TABLE Presupuestos (
     IdPresupuesto INT PRIMARY KEY IDENTITY(1,1),
-    IdUsuario INT NOT NULL FOREIGN KEY REFERENCES Usuarios(IdUsuario),
+    IdUsuario BIGINT NOT NULL FOREIGN KEY REFERENCES Usuarios(IdUsuario),
     NombrePresupuesto VARCHAR(100) NOT NULL,
     MontoTotal DECIMAL(18, 2) NOT NULL,
     FechaInicio DATE NOT NULL,
@@ -62,7 +72,7 @@ CREATE TABLE Gastos (
 
 CREATE TABLE Ingresos (
     IdIngreso INT PRIMARY KEY IDENTITY(1,1),
-    IdUsuario INT NOT NULL FOREIGN KEY REFERENCES Usuarios(IdUsuario),
+    IdUsuario BIGINT NOT NULL FOREIGN KEY REFERENCES Usuarios(IdUsuario),
     Monto DECIMAL(18, 2) NOT NULL,
     FechaIngreso DATETIME NOT NULL,
     Descripcion VARCHAR(255),
@@ -73,7 +83,7 @@ CREATE TABLE Ingresos (
 
 CREATE TABLE MetasAhorro (
     IdMeta INT PRIMARY KEY IDENTITY(1,1),
-    IdUsuario INT NOT NULL FOREIGN KEY REFERENCES Usuarios(IdUsuario),
+    IdUsuario BIGINT NOT NULL FOREIGN KEY REFERENCES Usuarios(IdUsuario),
     NombreMeta VARCHAR(100) NOT NULL,
     MontoMeta DECIMAL(18, 2) NOT NULL,
     FechaInicio DATE NOT NULL,
@@ -93,15 +103,16 @@ CREATE TABLE AportacionesAhorro (
 );
 
 CREATE TABLE MetodosPago (
-    IdMetodo INT PRIMARY KEY IDENTITY(1,1),
-    NombreMetodo VARCHAR(50) NOT NULL UNIQUE,
+    IdMetodoPago INT PRIMARY KEY IDENTITY(1,1),
+    MetodoPago VARCHAR(50) NOT NULL UNIQUE,
     Descripcion VARCHAR(255),
-    FechaCreacion DATETIME DEFAULT GETDATE()
+    FechaCreacion DATETIME DEFAULT GETDATE(),
+	FechaModificacion DATETIME NULL
 );
 
 -- Insertando datos iniciales
-INSERT INTO Usuarios (NombreUsuario, Email, ContraseñaHash) 
-VALUES ('andre123', 'andre@email.com', 'hashed_password');
+INSERT INTO Usuarios (Usuario, Correo, Contrasenia) 
+VALUES ('JveCorletto', 'est.j5martinez@gmail.com', 'MQAyADMANAA=');
 
 INSERT INTO Personas (IdUsuario, NombreCompleto, Telefono, Direccion, FechaNacimiento) 
 VALUES (1, 'André Pérez', '50312345678', 'San Salvador, El Salvador', '1995-05-15');
@@ -117,7 +128,7 @@ VALUES	(1, 'Renta', 'Pago de vivienda'),
 		(1, 'Transporte', 'Gastos en transporte'),
 		(2, 'Entretenimiento', 'Actividades recreativas');
 
-INSERT INTO MetodosPago (NombreMetodo, Descripcion) 
+INSERT INTO MetodosPago (MetodoPago, Descripcion) 
 VALUES	('Efectivo', 'Pago en efectivo'),
 		('Tarjeta de crédito', 'Pago con tarjeta de crédito'),
 		('Transferencia bancaria', 'Pago mediante transferencia bancaria');
