@@ -18,7 +18,7 @@ namespace Budgeter.API.Controllers
             _configuration = configuration;
         }
 
-
+        // API/Auth/login
         [HttpPost("login")]
         public IActionResult login([FromBody] LoginRequest request)
         {
